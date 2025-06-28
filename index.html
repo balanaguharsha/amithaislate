@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Late Notice</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Lora:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Lora', serif;
+            background-color: #1A202C; /* Deep navy/charcoal */
+            overflow: hidden; 
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+        }
+
+        /* Container for the floating emojis */
+        #emoji-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Individual emoji style */
+        .emoji {
+            position: absolute;
+            font-size: 2.5rem;
+            user-select: none;
+            opacity: 0.4;
+            animation: floatUp linear infinite;
+        }
+
+        @keyframes floatUp {
+            0% {
+                transform: translateY(110vh);
+                opacity: 0;
+            }
+            10%, 90% {
+                opacity: 0.4;
+            }
+            100% {
+                transform: translateY(-10vh);
+                opacity: 0;
+            }
+        }
+        
+        /* Name animation */
+        .animate-name {
+            animation: subtleGlow 3s ease-in-out infinite;
+        }
+
+        @keyframes subtleGlow {
+            0%, 100% {
+                transform: scale(1);
+                text-shadow: 0 0 6px rgba(253, 224, 71, 0.4);
+            }
+            50% {
+                transform: scale(1.02);
+                text-shadow: 0 0 12px rgba(253, 224, 71, 0.6);
+            }
+        }
+
+        /* New styles for the minute banner */
+        #minute-banner {
+            transform: translateY(-150%);
+            transition: transform 0.5s ease-in-out;
+            font-family: 'Playfair Display', serif;
+        }
+
+        #minute-banner.show {
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body class="text-gray-200 flex items-center justify-center min-h-screen">
+    <div id="emoji-container"></div>
+
+    <!-- New banner element for the minute alert -->
+    <div id="minute-banner" class="fixed top-5 left-0 w-full z-50 flex justify-center pointer-events-none">
+        <div class="bg-red-600/90 text-white font-bold p-4 rounded-lg shadow-2xl">
+            One more minute when you are late has passed ra Kanna
+        </div>
+    </div>
+
+    <div class="text-center p-8 z-10">
+        <h1 id="message" class="text-3xl md:text-5xl lg:text-6xl font-bold text-gray-100 transition-opacity duration-500">
+            <!-- Message will be injected by JavaScript -->
+        </h1>
+        <p class="text-2xl md:text-4xl font-semibold text-yellow-300 mt-8 animate-name">
+            AMITHA NAYAK
+        </p>
+        <p class="text-lg md:text-xl text-gray-400 mt-6 italic">
+            From BALANAGU HARSHA VARDHAN
+        </p>
+    </div>
+
+    <script>
+        // --- DOM Elements ---
+        const messageElement = document.getElementById('message');
+        const emojiContainer = document.getElementById('emoji-container');
+        const minuteBanner = document.getElementById('minute-banner');
+
+        // --- State Variables ---
+        let lastMinuteChecked = -1; // Tracks the last minute the banner was shown for
+
+        // --- Core Timer Logic ---
+        function updateTimer() {
+            const now = new Date();
+            const localTimeInMS = now.getTime();
+            const timezoneOffsetInMS = now.getTimezoneOffset() * 60 * 1000;
+            const utcTimeInMS = localTimeInMS + timezoneOffsetInMS;
+            const istOffsetInMS = 5.5 * 60 * 60 * 1000;
+            const istTime = new Date(utcTimeInMS + istOffsetInMS);
+            
+            const targetTime = new Date(istTime);
+            targetTime.setHours(22, 0, 0, 0); // 10 PM IST
+
+            const diffInMS = istTime - targetTime;
+
+            if (diffInMS > 0) {
+                // --- We are officially late ---
+                emojiContainer.style.display = 'block';
+
+                const totalSecondsLate = Math.floor(diffInMS / 1000);
+                const hoursLate = Math.floor(totalSecondsLate / 3600);
+                const minutesLate = Math.floor((totalSecondsLate % 3600) / 60);
+                const secondsLate = totalSecondsLate % 60;
+                
+                let timeString = "";
+                if (hoursLate > 0) timeString += `${hoursLate} hour${hoursLate > 1 ? 's' : ''}, `;
+                if (minutesLate > 0 || hoursLate > 0) timeString += `${minutesLate} minute${minutesLate > 1 ? 's' : ''}, and `;
+                timeString += `${secondsLate} second${secondsLate !== 1 ? 's' : ''}`;
+                
+                messageElement.innerHTML = `You are late by <span class="text-red-400">${timeString}</span>`;
+
+                // --- Check if a new minute has passed to show the banner ---
+                if (minutesLate > 0 && minutesLate > lastMinuteChecked) {
+                    lastMinuteChecked = minutesLate;
+                    showMinuteBanner();
+                }
+
+            } else {
+                // --- We are not late... yet ---
+                messageElement.textContent = "You are not late... yet.";
+                emojiContainer.style.display = 'none';
+                lastMinuteChecked = -1; // Reset tracker when not late
+            }
+        }
+        
+        // --- UI Functions ---
+        function showMinuteBanner() {
+            minuteBanner.classList.add('show');
+            // The banner will be visible for 4 seconds
+            setTimeout(() => {
+                minuteBanner.classList.remove('show');
+            }, 4000);
+        }
+
+        function createFlowingEmojis() {
+            const emojis = ['😠', '😡', '😤', '💢', '👺'];
+            const numberOfEmojis = 25; 
+
+            for (let i = 0; i < numberOfEmojis; i++) {
+                const emoji = document.createElement('span');
+                emoji.classList.add('emoji');
+                emoji.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+                emoji.style.left = `${Math.random() * 100}vw`;
+                emoji.style.animationDuration = `${Math.random() * 15 + 10}s`;
+                emoji.style.animationDelay = `-${Math.random() * 25}s`;
+                emojiContainer.appendChild(emoji);
+            }
+        }
+
+        // --- Initialization ---
+        updateTimer();
+        createFlowingEmojis();
+        setInterval(updateTimer, 1000);
+    </script>
+</body>
+</html>
