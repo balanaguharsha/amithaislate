@@ -19,8 +19,7 @@
             font-family: 'Playfair Display', serif;
         }
 
-        /* Container for the floating emojis */
-        #emoji-container {
+        #element-container {
             position: fixed;
             top: 0;
             left: 0;
@@ -30,30 +29,34 @@
             z-index: 0;
         }
 
-        /* Individual emoji style */
-        .emoji {
+        .floating-element {
             position: absolute;
-            font-size: 2.5rem;
             user-select: none;
-            opacity: 0.4;
-            animation: floatUp linear infinite;
+            opacity: 0.5;
+            animation: floatUp linear;
+        }
+        
+        .floating-element.emoji {
+             font-size: 2.5rem;
         }
 
         @keyframes floatUp {
             0% {
-                transform: translateY(110vh);
+                transform: translateY(110vh) rotate(0deg);
                 opacity: 0;
             }
-            10%, 90% {
-                opacity: 0.4;
+            10% {
+                opacity: 0.5;
+            }
+            90% {
+                opacity: 0.5;
             }
             100% {
-                transform: translateY(-10vh);
+                transform: translateY(-10vh) rotate(360deg);
                 opacity: 0;
             }
         }
         
-        /* Name animation */
         .animate-name {
             animation: subtleGlow 3s ease-in-out infinite;
         }
@@ -69,7 +72,6 @@
             }
         }
 
-        /* New styles for the minute banner */
         #minute-banner {
             transform: translateY(-150%);
             transition: transform 0.5s ease-in-out;
@@ -79,12 +81,77 @@
         #minute-banner.show {
             transform: translateY(0);
         }
+
+        /* --- Toggle Switch Styles --- */
+        .toggle-container {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem; 
+            color: #d1d5db; /* gray-300 */
+        }
+        .toggle-label {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 26px;
+        }
+        .toggle-label input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #374151; /* gray-700 */
+            transition: .4s;
+            border-radius: 26px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: #ca8a04; /* yellow-600 */
+        }
+        input:checked + .slider:before {
+            transform: translateX(24px);
+        }
+        /* Style to make the toggle emojis pop */
+        .toggle-emoji {
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.7);
+        }
+
     </style>
 </head>
 <body class="text-gray-200 flex items-center justify-center min-h-screen">
-    <div id="emoji-container"></div>
+    <div id="element-container"></div>
+    
+    <!-- Toggle Switch with Emojis -->
+    <div class="toggle-container">
+        <span class="text-2xl toggle-emoji">💃</span>
+        <label class="toggle-label">
+            <input type="checkbox" id="name-toggle">
+            <span class="slider"></span>
+        </label>
+        <span class="text-2xl toggle-emoji">🕺</span>
+    </div>
 
-    <!-- New banner element for the minute alert -->
+    <!-- Banner for the minute alert -->
     <div id="minute-banner" class="fixed top-5 left-0 w-full z-50 flex justify-center pointer-events-none">
         <div class="bg-red-600/90 text-white font-bold p-4 rounded-lg shadow-2xl">
             One more minute when you are late has passed ra Kanna
@@ -95,10 +162,10 @@
         <h1 id="message" class="text-3xl md:text-5xl lg:text-6xl font-bold text-gray-100 transition-opacity duration-500">
             <!-- Message will be injected by JavaScript -->
         </h1>
-        <p class="text-2xl md:text-4xl font-semibold text-yellow-300 mt-8 animate-name">
+        <p id="main-name" class="text-2xl md:text-4xl font-semibold text-yellow-300 mt-8 animate-name">
             AMITHA NAYAK
         </p>
-        <p class="text-lg md:text-xl text-gray-400 mt-6 italic">
+        <p id="from-name" class="text-lg md:text-xl text-gray-400 mt-6 italic">
             From BALANAGU HARSHA VARDHAN
         </p>
     </div>
@@ -106,11 +173,31 @@
     <script>
         // --- DOM Elements ---
         const messageElement = document.getElementById('message');
-        const emojiContainer = document.getElementById('emoji-container');
+        const elementContainer = document.getElementById('element-container');
         const minuteBanner = document.getElementById('minute-banner');
+        const nameToggle = document.getElementById('name-toggle');
+        const mainNameElement = document.getElementById('main-name');
+        const fromNameElement = document.getElementById('from-name');
+
 
         // --- State Variables ---
-        let lastMinuteChecked = -1; // Tracks the last minute the banner was shown for
+        let lastMinuteChecked = -1; 
+        let isCurrentlyLate = false;
+        let addElementInterval = null;
+        const elementPool = ['😠', '😡', '😤', '💢', '👺']; // Pool now only contains emojis
+
+        // --- Name Swapping Logic ---
+        function swapNames() {
+            // Checks the toggle state and updates the names.
+            const isBoy = nameToggle.checked;
+            if (isBoy) {
+                mainNameElement.textContent = 'BALANAGU HARSHA VARDHAN';
+                fromNameElement.textContent = 'From AMITHA NAYAK';
+            } else {
+                mainNameElement.textContent = 'AMITHA NAYAK';
+                fromNameElement.textContent = 'From BALANAGU HARSHA VARDHAN';
+            }
+        }
 
         // --- Core Timer Logic ---
         function updateTimer() {
@@ -128,7 +215,10 @@
 
             if (diffInMS > 0) {
                 // --- We are officially late ---
-                emojiContainer.style.display = 'block';
+                if (!isCurrentlyLate) {
+                    isCurrentlyLate = true;
+                    startContinuousEffects();
+                }
 
                 const totalSecondsLate = Math.floor(diffInMS / 1000);
                 const hoursLate = Math.floor(totalSecondsLate / 3600);
@@ -142,48 +232,77 @@
                 
                 messageElement.innerHTML = `You are late by <span class="text-red-400">${timeString}</span>`;
 
-                // --- Check if a new minute has passed to show the banner ---
                 if (minutesLate > 0 && minutesLate > lastMinuteChecked) {
                     lastMinuteChecked = minutesLate;
                     showMinuteBanner();
                 }
 
             } else {
-                // --- We are not late... yet ---
+                 // --- We are not late... yet ---
+                if (isCurrentlyLate) {
+                    isCurrentlyLate = false;
+                    stopContinuousEffects();
+                }
                 messageElement.textContent = "You are not late... yet.";
-                emojiContainer.style.display = 'none';
-                lastMinuteChecked = -1; // Reset tracker when not late
+                lastMinuteChecked = -1; 
             }
         }
         
-        // --- UI Functions ---
+        // --- UI & Animation Functions ---
         function showMinuteBanner() {
             minuteBanner.classList.add('show');
-            // The banner will be visible for 4 seconds
             setTimeout(() => {
                 minuteBanner.classList.remove('show');
             }, 4000);
         }
 
-        function createFlowingEmojis() {
-            const emojis = ['😠', '😡', '😤', '💢', '👺'];
-            const numberOfEmojis = 25; 
+        function createSingleFlowingElement(emoji) {
+            const elementNode = document.createElement('span');
+            elementNode.textContent = emoji;
+            elementNode.classList.add('floating-element', 'emoji');
+            
+            elementNode.style.left = `${Math.random() * 100}vw`;
+            // The duration of the animation is random.
+            const duration = Math.random() * 15 + 10;
+            elementNode.style.animationDuration = `${duration}s`;
+            // The element removes itself from the DOM when the animation is complete.
+            elementNode.addEventListener('animationend', () => {
+                elementNode.remove();
+            });
 
-            for (let i = 0; i < numberOfEmojis; i++) {
-                const emoji = document.createElement('span');
-                emoji.classList.add('emoji');
-                emoji.textContent = emojis[Math.floor(Math.random() * emojis.length)];
-                emoji.style.left = `${Math.random() * 100}vw`;
-                emoji.style.animationDuration = `${Math.random() * 15 + 10}s`;
-                emoji.style.animationDelay = `-${Math.random() * 25}s`;
-                emojiContainer.appendChild(emoji);
-            }
+            elementContainer.appendChild(elementNode);
+        }
+        
+        function startContinuousEffects() {
+            console.log("Starting background effects...");
+            elementContainer.style.display = 'block';
+           
+            // Add a new random element from the pool to the screen every second
+            addElementInterval = setInterval(() => {
+                createSingleFlowingElement(elementPool[Math.floor(Math.random() * elementPool.length)]);
+            }, 1000);
+        }
+
+        function stopContinuousEffects() {
+            console.log("Stopping background effects.");
+            elementContainer.style.display = 'none';
+            elementContainer.innerHTML = ''; // Clear any remaining elements
+            
+            clearInterval(addElementInterval);
+            addElementInterval = null;
         }
 
         // --- Initialization ---
-        updateTimer();
-        createFlowingEmojis();
-        setInterval(updateTimer, 1000);
+        function initialize() {
+            // Set up the listener for the name toggle
+            nameToggle.addEventListener('change', swapNames);
+
+            // Start the main clock
+            updateTimer();
+            setInterval(updateTimer, 1000);
+        }
+
+        initialize();
     </script>
 </body>
 </html>
