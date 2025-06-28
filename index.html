@@ -9,31 +9,48 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Lora:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
     <style>
+        /* --- CSS Variables for Theming --- */
+        :root {
+            --bg-color: #1A202C;
+            --text-color: #d1d5db;
+            --main-text-color: #f3f4f6;
+            --accent-color: #facc15;
+            --highlight-color: #ef4444;
+            --glow-color: rgba(253, 224, 71, 0.6);
+            --banner-bg-color: #dc2626;
+            --slider-accent: #ca8a04;
+        }
+
+        body.lovey-dovey {
+            --bg-color: #fff1f2;
+            --text-color: #881337;
+            --main-text-color: #9f1239;
+            --accent-color: #e11d48;
+            --highlight-color: #f43f5e;
+            --glow-color: rgba(236, 72, 153, 0.7);
+            --banner-bg-color: #ec4899;
+            --slider-accent: #db2777;
+        }
+
         body {
             font-family: 'Lora', serif;
-            background-color: #1A202C; /* Deep navy/charcoal */
-            overflow: hidden; 
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            overflow: hidden;
+            transition: background-color 0.5s, color 0.5s;
         }
 
         h1 {
             font-family: 'Playfair Display', serif;
+            color: var(--main-text-color);
         }
 
         #element-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 0;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0;
         }
 
         .floating-element {
-            position: absolute;
-            user-select: none;
-            opacity: 0.5;
-            animation: floatUp linear;
+            position: absolute; user-select: none; opacity: 0.5; animation: floatUp linear;
         }
         
         .floating-element.emoji {
@@ -41,93 +58,58 @@
         }
 
         @keyframes floatUp {
-            0% {
-                transform: translateY(110vh) rotate(0deg);
-                opacity: 0;
-            }
-            10% {
-                opacity: 0.5;
-            }
-            90% {
-                opacity: 0.5;
-            }
-            100% {
-                transform: translateY(-10vh) rotate(360deg);
-                opacity: 0;
-            }
+            0% { transform: translateY(110vh) rotate(0deg); opacity: 0; }
+            10%, 90% { opacity: 0.5; }
+            100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
         }
         
         .animate-name {
             animation: subtleGlow 3s ease-in-out infinite;
+            color: var(--accent-color);
         }
 
         @keyframes subtleGlow {
-            0%, 100% {
-                transform: scale(1);
-                text-shadow: 0 0 6px rgba(253, 224, 71, 0.4);
-            }
-            50% {
-                transform: scale(1.02);
-                text-shadow: 0 0 12px rgba(253, 224, 71, 0.6);
-            }
+            0%, 100% { transform: scale(1); text-shadow: 0 0 8px var(--glow-color); }
+            50% { transform: scale(1.02); text-shadow: 0 0 16px var(--glow-color); }
         }
 
         #minute-banner {
-            transform: translateY(-150%);
-            transition: transform 0.5s ease-in-out;
-            font-family: 'Playfair Display', serif;
+            transform: translateY(-150%); transition: transform 0.5s ease-in-out; font-family: 'Playfair Display', serif;
         }
 
         #minute-banner.show {
             transform: translateY(0);
         }
+        #minute-banner-content {
+            background-color: var(--banner-bg-color);
+        }
 
-        /* --- Toggle Switch Styles --- */
-        .toggle-container {
-            position: absolute;
-            top: 1.5rem;
-            right: 1.5rem;
+        /* --- Toggle Switch Styles (inside modal) --- */
+        .modal-toggles-wrapper {
             display: flex;
+            justify-content: space-around;
             align-items: center;
-            gap: 0.75rem; 
-            color: #d1d5db;
-            z-index: 20;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid #374151;
+        }
+        .toggle-container {
+            display: flex; align-items: center; gap: 0.75rem;
         }
         .toggle-label {
-            position: relative;
-            display: inline-block;
-            width: 50px;
-            height: 26px;
+            position: relative; display: inline-block; width: 50px; height: 26px;
         }
         .toggle-label input {
-            opacity: 0;
-            width: 0;
-            height: 0;
+            opacity: 0; width: 0; height: 0;
         }
         .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #374151;
-            transition: .4s;
-            border-radius: 26px;
+            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #374151; transition: .4s; border-radius: 26px;
         }
         .slider:before {
-            position: absolute;
-            content: "";
-            height: 20px;
-            width: 20px;
-            left: 3px;
-            bottom: 3px;
-            background-color: white;
-            transition: .4s;
-            border-radius: 50%;
+            position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%;
         }
         input:checked + .slider {
-            background-color: #ca8a04;
+            background-color: var(--slider-accent);
         }
         input:checked + .slider:before {
             transform: translateX(24px);
@@ -146,95 +128,78 @@
             cursor: pointer;
             z-index: 20;
         }
+        .settings-button svg {
+            color: var(--text-color);
+        }
+        .settings-button:hover svg {
+            color: white;
+        }
         .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 40;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.7); display: flex; align-items: center; justify-content: center; z-index: 40;
         }
         .modal-content {
-            background-color: #1f2937; /* gray-800 */
-            color: #d1d5db; /* gray-300 */
-            padding: 2rem;
-            border-radius: 0.5rem;
-            width: 90%;
-            max-width: 400px;
-            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
-            font-family: 'Lora', serif;
+            background-color: #1f2937; color: #d1d5db; padding: 2rem; border-radius: 0.5rem; width: 90%; max-width: 400px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05); font-family: 'Lora', serif;
         }
         .modal-content h2 {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.5rem;
-            margin-bottom: 1.5rem;
-            color: #f3f4f6; /* gray-100 */
+            font-family: 'Playfair Display', serif; font-size: 1.5rem; margin-bottom: 1.5rem; color: #f3f4f6;
         }
         .modal-content label {
-            display: block;
-            margin-bottom: 0.5rem;
+            display: block; margin-bottom: 0.5rem;
         }
         .modal-content input, .modal-content select {
-            width: 100%;
-            background-color: #374151; /* gray-700 */
-            border: 1px solid #4b5563; /* gray-600 */
-            padding: 0.5rem;
-            border-radius: 0.25rem;
-            margin-bottom: 1rem;
-            color: #f3f4f6;
+            width: 100%; background-color: #374151; border: 1px solid #4b5563; padding: 0.5rem; border-radius: 0.25rem; margin-bottom: 1rem; color: #f3f4f6;
         }
         .modal-buttons {
-            display: flex;
-            justify-content: flex-end;
-            gap: 1rem;
-            margin-top: 1rem;
+            display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1rem;
         }
         .modal-buttons button {
-            padding: 0.5rem 1rem;
-            border-radius: 0.25rem;
-            border: none;
-            cursor: pointer;
-            font-weight: bold;
+            padding: 0.5rem 1rem; border-radius: 0.25rem; border: none; cursor: pointer; font-weight: bold;
         }
         .btn-save {
-            background-color: #ca8a04; /* yellow-600 */
-            color: white;
+            background-color: var(--slider-accent); color: white;
         }
-         .btn-close {
-            background-color: #4b5563; /* gray-600 */
-            color: white;
+        .btn-close {
+            background-color: #4b5563; color: white;
         }
 
     </style>
 </head>
-<body class="text-gray-200 flex items-center justify-center min-h-screen">
+<body class="flex items-center justify-center min-h-screen">
     <div id="element-container"></div>
     
     <!-- Settings Gear Icon -->
     <button id="settings-button" class="settings-button">
-        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400 hover:text-white transition-colors">
-            <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 0 2l-.15.08a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1 0-2l.15-.08a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle>
+        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 0 2l-.15.08a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l-.22-.38a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1 0-2l.15-.08a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle>
         </svg>
     </button>
     
-    <!-- Toggle Switch with Emojis -->
-    <div class="toggle-container">
-        <span class="text-2xl toggle-emoji">💃</span>
-        <label class="toggle-label">
-            <input type="checkbox" id="name-toggle">
-            <span class="slider"></span>
-        </label>
-        <span class="text-2xl toggle-emoji">🕺</span>
-    </div>
-
     <!-- Settings Modal -->
     <div id="settings-modal" class="modal-overlay hidden">
         <div class="modal-content">
             <h2>Settings</h2>
+
+            <div class="modal-toggles-wrapper">
+                <!-- Mood Toggle -->
+                <div class="toggle-container">
+                    <span class="text-2xl toggle-emoji">😠</span>
+                    <label class="toggle-label">
+                        <input type="checkbox" id="mood-toggle">
+                        <span class="slider"></span>
+                    </label>
+                    <span class="text-2xl toggle-emoji">🥰</span>
+                </div>
+                <!-- Name Toggle -->
+                <div class="toggle-container">
+                    <span class="text-2xl toggle-emoji">💃</span>
+                    <label class="toggle-label">
+                        <input type="checkbox" id="name-toggle">
+                        <span class="slider"></span>
+                    </label>
+                    <span class="text-2xl toggle-emoji">🕺</span>
+                </div>
+            </div>
+
             <div>
                 <label for="time-input">Target Time</label>
                 <input type="time" id="time-input">
@@ -245,8 +210,7 @@
                 <datalist id="timezone-list"></datalist>
             </div>
             <div class="modal-buttons">
-                <button id="close-modal-button" class="btn-close">Close</button>
-                <button id="save-settings-button" class="btn-save">Save</button>
+                <button id="close-modal-button" class="btn-close">Done</button>
             </div>
         </div>
     </div>
@@ -254,19 +218,19 @@
 
     <!-- Banner for the minute alert -->
     <div id="minute-banner" class="fixed top-5 left-0 w-full z-50 flex justify-center pointer-events-none">
-        <div class="bg-red-600/90 text-white font-bold p-4 rounded-lg shadow-2xl">
+        <div id="minute-banner-content" class="text-white font-bold p-4 rounded-lg shadow-2xl">
             One more minute when you are late has passed ra Kanna
         </div>
     </div>
 
     <div class="text-center p-8 z-10">
-        <h1 id="message" class="text-3xl md:text-5xl lg:text-6xl font-bold text-gray-100 transition-opacity duration-500">
+        <h1 id="message" class="text-3xl md:text-5xl lg:text-6xl font-bold transition-opacity duration-500">
             <!-- Message will be injected by JavaScript -->
         </h1>
-        <p id="main-name" class="text-2xl md:text-4xl font-semibold text-yellow-300 mt-8 animate-name">
+        <p id="main-name" class="text-2xl md:text-4xl font-semibold mt-8 animate-name">
             AMITHA NAYAK
         </p>
-        <p id="from-name" class="text-lg md:text-xl text-gray-400 mt-6 italic">
+        <p id="from-name" class="text-lg md:text-xl mt-6 italic">
             From BALANAGU HARSHA VARDHAN
         </p>
     </div>
@@ -276,13 +240,14 @@
         const messageElement = document.getElementById('message');
         const elementContainer = document.getElementById('element-container');
         const minuteBanner = document.getElementById('minute-banner');
+        const minuteBannerContent = document.getElementById('minute-banner-content');
         const nameToggle = document.getElementById('name-toggle');
+        const moodToggle = document.getElementById('mood-toggle');
         const mainNameElement = document.getElementById('main-name');
         const fromNameElement = document.getElementById('from-name');
         const settingsButton = document.getElementById('settings-button');
         const settingsModal = document.getElementById('settings-modal');
         const closeModalButton = document.getElementById('close-modal-button');
-        const saveSettingsButton = document.getElementById('save-settings-button');
         const timeInput = document.getElementById('time-input');
         const timezoneInput = document.getElementById('timezone-input');
         const timezoneList = document.getElementById('timezone-list');
@@ -293,11 +258,37 @@
         let targetTimezoneIANA = 'Asia/Kolkata'; // Default to IST
         let lastMinuteChecked = -1; 
         let isCurrentlyLate = false;
+        let isLoveyDovey = false;
         let addElementInterval = null;
-        const elementPool = ['😠', '😡', '😤', '💢', '👺'];
+        const emojiPools = {
+            angry: ['😠', '😡', '😤', '💢', '👺'],
+            lovey: ['😍', '😘', '❤️', '💖', '🥰']
+        };
+        let elementPool = emojiPools.angry;
         let timezoneData = [];
 
-        // --- Name Swapping Logic ---
+        const textContent = {
+            angry: {
+                lateMessage: "You are late by",
+                notLateMessage: "You are not late... yet.",
+                bannerMessage: "One more minute when you are late has passed ra Kanna"
+            },
+            lovey: {
+                lateMessage: "I've been waiting for",
+                notLateMessage: "Counting every second until it's time...",
+                bannerMessage: "Every minute feels like an eternity without you, Kanna"
+            }
+        };
+
+        // --- Event Listeners ---
+        nameToggle.addEventListener('change', swapNames);
+        moodToggle.addEventListener('change', updateTheme);
+        settingsButton.addEventListener('click', openSettingsModal);
+        closeModalButton.addEventListener('click', saveSettings); // Save on close
+        timeInput.addEventListener('change', saveTimeAndTimezone);
+        timezoneInput.addEventListener('change', saveTimeAndTimezone);
+
+        // --- Theme and Name Logic ---
         function swapNames() {
             const isBoy = nameToggle.checked;
             if (isBoy) {
@@ -309,14 +300,26 @@
             }
         }
 
+        function updateTheme() {
+            isLoveyDovey = moodToggle.checked;
+            document.body.classList.toggle('lovey-dovey', isLoveyDovey);
+            elementPool = isLoveyDovey ? emojiPools.lovey : emojiPools.angry;
+            // Clear old elements and restart if the mode changes while active
+            if (isCurrentlyLate) {
+                stopContinuousEffects();
+                startContinuousEffects();
+            }
+            updateTimer(); // Refresh text immediately
+        }
+
         // --- Core Timer Logic ---
         function updateTimer() {
             const nowInZone = new Date(new Date().toLocaleString('en-US', { timeZone: targetTimezoneIANA }));
-            
             const targetTime = new Date(nowInZone);
             targetTime.setHours(targetHour, targetMinute, 0, 0);
-
             const diffInMS = nowInZone - targetTime;
+
+            const currentText = isLoveyDovey ? textContent.lovey : textContent.angry;
 
             if (diffInMS > 0) {
                 if (!isCurrentlyLate) {
@@ -334,7 +337,7 @@
                 if (minutesLate > 0 || hoursLate > 0) timeString += `${minutesLate} minute${minutesLate > 1 ? 's' : ''}, and `;
                 timeString += `${secondsLate} second${secondsLate !== 1 ? 's' : ''}`;
                 
-                messageElement.innerHTML = `You are late by <span class="text-red-400">${timeString}</span>`;
+                messageElement.innerHTML = `${currentText.lateMessage} <span style="color:var(--highlight-color)">${timeString}</span>`;
 
                 if (minutesLate > 0 && minutesLate > lastMinuteChecked) {
                     lastMinuteChecked = minutesLate;
@@ -346,13 +349,15 @@
                     isCurrentlyLate = false;
                     stopContinuousEffects();
                 }
-                messageElement.textContent = "You are not late... yet.";
+                messageElement.textContent = currentText.notLateMessage;
                 lastMinuteChecked = -1; 
             }
         }
         
         // --- UI & Animation Functions ---
         function showMinuteBanner() {
+            const currentText = isLoveyDovey ? textContent.lovey : textContent.angry;
+            minuteBannerContent.textContent = currentText.bannerMessage;
             minuteBanner.classList.add('show');
             setTimeout(() => {
                 minuteBanner.classList.remove('show');
@@ -391,11 +396,9 @@
         // --- Settings Modal Logic ---
         function populateTimezoneSelector() {
             const allIanaTimezones = Intl.supportedValuesOf('timeZone');
-            
             timezoneData = allIanaTimezones.map(tz => {
                 const now = new Date();
-                const offsetString = now.toLocaleString('en', { timeZone: tz, timeZoneName: 'longOffset' }).split(' ').pop(); // e.g., "GMT-7" or "GMT+5:30"
-                
+                const offsetString = now.toLocaleString('en', { timeZone: tz, timeZoneName: 'longOffset' }).split(' ').pop();
                 let offset = 0;
                 try {
                     const offsetParts = offsetString.replace('GMT', '').split(':');
@@ -403,21 +406,11 @@
                     const minutes = offsetParts[1] ? parseInt(offsetParts[1], 10) : 0;
                     const sign = hours < 0 ? -1 : 1;
                     offset = hours + (sign * (minutes / 60));
-                } catch(e) {
-                    console.error(`Could not parse offset for ${tz}: ${offsetString}`);
-                }
+                } catch(e) { console.error(`Could not parse offset for ${tz}: ${offsetString}`); }
+                return { iana: tz, offset, display: `${tz.replace(/_/g, ' ')} (${offsetString})` };
+            }).sort((a, b) => a.offset - b.offset);
 
-                const displayName = `${tz.replace(/_/g, ' ')} (${offsetString})`;
-                
-                return {
-                    iana: tz,
-                    offset: offset,
-                    display: displayName
-                };
-            }).sort((a, b) => a.offset - b.offset); // Sort by numerical offset
-
-            timezoneList.innerHTML = ''; // Clear existing options
-            
+            timezoneList.innerHTML = '';
             timezoneData.forEach(tzInfo => {
                 const option = document.createElement('option');
                 option.value = tzInfo.display;
@@ -432,14 +425,14 @@
             settingsModal.classList.remove('hidden');
         }
         
-        function closeSettingsModal() {
-            settingsModal.classList.add('hidden');
-        }
-        
         function saveSettings() {
+             saveTimeAndTimezone();
+             settingsModal.classList.add('hidden');
+        }
+
+        function saveTimeAndTimezone() {
             const [hour, minute] = timeInput.value.split(':');
             const selectedDisplay = timezoneInput.value;
-            
             const selectedTzInfo = timezoneData.find(tz => tz.display === selectedDisplay);
 
             if (selectedTzInfo) {
@@ -448,20 +441,17 @@
                 targetTimezoneIANA = selectedTzInfo.iana;
                 console.log(`Settings saved: ${targetHour}:${targetMinute} (${targetTimezoneIANA})`);
                 updateTimer();
-                closeSettingsModal();
             } else {
-                alert("Please select a valid timezone from the list.");
+                // If the user typed an invalid timezone, we don't save it but we still save the time.
+                targetHour = parseInt(hour, 10);
+                targetMinute = parseInt(minute, 10);
+                updateTimer();
             }
         }
 
         // --- Initialization ---
         function initialize() {
             populateTimezoneSelector();
-            nameToggle.addEventListener('change', swapNames);
-            settingsButton.addEventListener('click', openSettingsModal);
-            closeModalButton.addEventListener('click', closeSettingsModal);
-            saveSettingsButton.addEventListener('click', saveSettings);
-            
             updateTimer();
             setInterval(updateTimer, 1000);
         }
