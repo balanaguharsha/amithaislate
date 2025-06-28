@@ -90,7 +90,8 @@
             display: flex;
             align-items: center;
             gap: 0.75rem; 
-            color: #d1d5db; /* gray-300 */
+            color: #d1d5db;
+            z-index: 20;
         }
         .toggle-label {
             position: relative;
@@ -110,7 +111,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background-color: #374151; /* gray-700 */
+            background-color: #374151;
             transition: .4s;
             border-radius: 26px;
         }
@@ -126,20 +127,99 @@
             border-radius: 50%;
         }
         input:checked + .slider {
-            background-color: #ca8a04; /* yellow-600 */
+            background-color: #ca8a04;
         }
         input:checked + .slider:before {
             transform: translateX(24px);
         }
-        /* Style to make the toggle emojis pop */
         .toggle-emoji {
             text-shadow: 0 0 8px rgba(255, 255, 255, 0.7);
+        }
+        
+        /* --- Settings Modal Styles --- */
+        .settings-button {
+            position: absolute;
+            top: 1.5rem;
+            left: 1.5rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            z-index: 20;
+        }
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 40;
+        }
+        .modal-content {
+            background-color: #1f2937; /* gray-800 */
+            color: #d1d5db; /* gray-300 */
+            padding: 2rem;
+            border-radius: 0.5rem;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+            font-family: 'Lora', serif;
+        }
+        .modal-content h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: #f3f4f6; /* gray-100 */
+        }
+        .modal-content label {
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+        .modal-content input, .modal-content select {
+            width: 100%;
+            background-color: #374151; /* gray-700 */
+            border: 1px solid #4b5563; /* gray-600 */
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+            margin-bottom: 1rem;
+            color: #f3f4f6;
+        }
+        .modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        .modal-buttons button {
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn-save {
+            background-color: #ca8a04; /* yellow-600 */
+            color: white;
+        }
+         .btn-close {
+            background-color: #4b5563; /* gray-600 */
+            color: white;
         }
 
     </style>
 </head>
 <body class="text-gray-200 flex items-center justify-center min-h-screen">
     <div id="element-container"></div>
+    
+    <!-- Settings Gear Icon -->
+    <button id="settings-button" class="settings-button">
+        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400 hover:text-white transition-colors">
+            <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 0 2l-.15.08a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1 0-2l.15-.08a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle>
+        </svg>
+    </button>
     
     <!-- Toggle Switch with Emojis -->
     <div class="toggle-container">
@@ -150,6 +230,27 @@
         </label>
         <span class="text-2xl toggle-emoji">🕺</span>
     </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h2>Settings</h2>
+            <div>
+                <label for="time-input">Target Time</label>
+                <input type="time" id="time-input">
+            </div>
+            <div>
+                <label for="timezone-input">Timezone</label>
+                <input type="text" id="timezone-input" list="timezone-list" placeholder="Search for a timezone...">
+                <datalist id="timezone-list"></datalist>
+            </div>
+            <div class="modal-buttons">
+                <button id="close-modal-button" class="btn-close">Close</button>
+                <button id="save-settings-button" class="btn-save">Save</button>
+            </div>
+        </div>
+    </div>
+
 
     <!-- Banner for the minute alert -->
     <div id="minute-banner" class="fixed top-5 left-0 w-full z-50 flex justify-center pointer-events-none">
@@ -178,17 +279,26 @@
         const nameToggle = document.getElementById('name-toggle');
         const mainNameElement = document.getElementById('main-name');
         const fromNameElement = document.getElementById('from-name');
-
+        const settingsButton = document.getElementById('settings-button');
+        const settingsModal = document.getElementById('settings-modal');
+        const closeModalButton = document.getElementById('close-modal-button');
+        const saveSettingsButton = document.getElementById('save-settings-button');
+        const timeInput = document.getElementById('time-input');
+        const timezoneInput = document.getElementById('timezone-input');
+        const timezoneList = document.getElementById('timezone-list');
 
         // --- State Variables ---
+        let targetHour = 22;
+        let targetMinute = 0;
+        let targetTimezoneIANA = 'Asia/Kolkata'; // Default to IST
         let lastMinuteChecked = -1; 
         let isCurrentlyLate = false;
         let addElementInterval = null;
-        const elementPool = ['😠', '😡', '😤', '💢', '👺']; // Pool now only contains emojis
+        const elementPool = ['😠', '😡', '😤', '💢', '👺'];
+        let timezoneData = [];
 
         // --- Name Swapping Logic ---
         function swapNames() {
-            // Checks the toggle state and updates the names.
             const isBoy = nameToggle.checked;
             if (isBoy) {
                 mainNameElement.textContent = 'BALANAGU HARSHA VARDHAN';
@@ -201,20 +311,14 @@
 
         // --- Core Timer Logic ---
         function updateTimer() {
-            const now = new Date();
-            const localTimeInMS = now.getTime();
-            const timezoneOffsetInMS = now.getTimezoneOffset() * 60 * 1000;
-            const utcTimeInMS = localTimeInMS + timezoneOffsetInMS;
-            const istOffsetInMS = 5.5 * 60 * 60 * 1000;
-            const istTime = new Date(utcTimeInMS + istOffsetInMS);
+            const nowInZone = new Date(new Date().toLocaleString('en-US', { timeZone: targetTimezoneIANA }));
             
-            const targetTime = new Date(istTime);
-            targetTime.setHours(22, 0, 0, 0); // 10 PM IST
+            const targetTime = new Date(nowInZone);
+            targetTime.setHours(targetHour, targetMinute, 0, 0);
 
-            const diffInMS = istTime - targetTime;
+            const diffInMS = nowInZone - targetTime;
 
             if (diffInMS > 0) {
-                // --- We are officially late ---
                 if (!isCurrentlyLate) {
                     isCurrentlyLate = true;
                     startContinuousEffects();
@@ -238,7 +342,6 @@
                 }
 
             } else {
-                 // --- We are not late... yet ---
                 if (isCurrentlyLate) {
                     isCurrentlyLate = false;
                     stopContinuousEffects();
@@ -262,10 +365,8 @@
             elementNode.classList.add('floating-element', 'emoji');
             
             elementNode.style.left = `${Math.random() * 100}vw`;
-            // The duration of the animation is random.
             const duration = Math.random() * 15 + 10;
             elementNode.style.animationDuration = `${duration}s`;
-            // The element removes itself from the DOM when the animation is complete.
             elementNode.addEventListener('animationend', () => {
                 elementNode.remove();
             });
@@ -274,30 +375,93 @@
         }
         
         function startContinuousEffects() {
-            console.log("Starting background effects...");
             elementContainer.style.display = 'block';
-           
-            // Add a new random element from the pool to the screen every second
             addElementInterval = setInterval(() => {
                 createSingleFlowingElement(elementPool[Math.floor(Math.random() * elementPool.length)]);
             }, 1000);
         }
 
         function stopContinuousEffects() {
-            console.log("Stopping background effects.");
             elementContainer.style.display = 'none';
-            elementContainer.innerHTML = ''; // Clear any remaining elements
-            
+            elementContainer.innerHTML = ''; 
             clearInterval(addElementInterval);
             addElementInterval = null;
+        }
+        
+        // --- Settings Modal Logic ---
+        function populateTimezoneSelector() {
+            const allIanaTimezones = Intl.supportedValuesOf('timeZone');
+            
+            timezoneData = allIanaTimezones.map(tz => {
+                const now = new Date();
+                const offsetString = now.toLocaleString('en', { timeZone: tz, timeZoneName: 'longOffset' }).split(' ').pop(); // e.g., "GMT-7" or "GMT+5:30"
+                
+                let offset = 0;
+                try {
+                    const offsetParts = offsetString.replace('GMT', '').split(':');
+                    const hours = parseInt(offsetParts[0], 10);
+                    const minutes = offsetParts[1] ? parseInt(offsetParts[1], 10) : 0;
+                    const sign = hours < 0 ? -1 : 1;
+                    offset = hours + (sign * (minutes / 60));
+                } catch(e) {
+                    console.error(`Could not parse offset for ${tz}: ${offsetString}`);
+                }
+
+                const displayName = `${tz.replace(/_/g, ' ')} (${offsetString})`;
+                
+                return {
+                    iana: tz,
+                    offset: offset,
+                    display: displayName
+                };
+            }).sort((a, b) => a.offset - b.offset); // Sort by numerical offset
+
+            timezoneList.innerHTML = ''; // Clear existing options
+            
+            timezoneData.forEach(tzInfo => {
+                const option = document.createElement('option');
+                option.value = tzInfo.display;
+                timezoneList.appendChild(option);
+            });
+        }
+        
+        function openSettingsModal() {
+            timeInput.value = `${String(targetHour).padStart(2, '0')}:${String(targetMinute).padStart(2, '0')}`;
+            const currentTz = timezoneData.find(tz => tz.iana === targetTimezoneIANA);
+            timezoneInput.value = currentTz ? currentTz.display : '';
+            settingsModal.classList.remove('hidden');
+        }
+        
+        function closeSettingsModal() {
+            settingsModal.classList.add('hidden');
+        }
+        
+        function saveSettings() {
+            const [hour, minute] = timeInput.value.split(':');
+            const selectedDisplay = timezoneInput.value;
+            
+            const selectedTzInfo = timezoneData.find(tz => tz.display === selectedDisplay);
+
+            if (selectedTzInfo) {
+                targetHour = parseInt(hour, 10);
+                targetMinute = parseInt(minute, 10);
+                targetTimezoneIANA = selectedTzInfo.iana;
+                console.log(`Settings saved: ${targetHour}:${targetMinute} (${targetTimezoneIANA})`);
+                updateTimer();
+                closeSettingsModal();
+            } else {
+                alert("Please select a valid timezone from the list.");
+            }
         }
 
         // --- Initialization ---
         function initialize() {
-            // Set up the listener for the name toggle
+            populateTimezoneSelector();
             nameToggle.addEventListener('change', swapNames);
-
-            // Start the main clock
+            settingsButton.addEventListener('click', openSettingsModal);
+            closeModalButton.addEventListener('click', closeSettingsModal);
+            saveSettingsButton.addEventListener('click', saveSettings);
+            
             updateTimer();
             setInterval(updateTimer, 1000);
         }
